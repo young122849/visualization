@@ -1,7 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-
+import Login from './views/Login.vue'
+import Chart from './views/Chart.vue'
+import Register from './views/Register.vue'
+import Project from './views/Project.vue'
+import store from '@/store';
+import Userservice from './services/user.service'
+import { filter, pluck } from 'rxjs/operators';
+let service = new Userservice()
 Vue.use(Router)
 
 export default new Router({
@@ -11,7 +18,78 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: Home,
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (to.matched.some(record => record.meta.requireAuth)) {
+          // 如果需要进入的路由需要验证,则进行验证
+          service.checkLogin('http://localhost:3000/session/')
+            .pipe(pluck('data')).subscribe((res: any) => {
+              if (res.success) {
+                store.commit('operation/getUser', res)
+                next()
+              }
+            })
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/projects',
+      name: 'project',
+      component: Project,
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (to.matched.some(record => record.meta.requireAuth)) {
+          // 如果需要进入的路由需要验证,则进行验证
+          service.checkLogin('http://localhost:3000/session/')
+            .pipe(pluck('data')).subscribe((res: any) => {
+              if (res.success) {
+                store.commit('operation/getUser', res)
+                next()
+              }
+            })
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register
+    },
+    {
+      path: '/charts',
+      name: 'chart',
+      component: Chart,
+      meta: {
+        requireAuth: true
+      },
+      beforeEnter: (to, from, next) => {
+        if (to.matched.some(record => record.meta.requireAuth)) {
+          // 如果需要进入的路由需要验证,则进行验证
+          service.checkLogin('http://localhost:3000/session/')
+            .pipe(pluck('data')).subscribe((res: any) => {
+              if (res.success) {
+                store.commit('operation/getUser', res)
+                next()
+              }
+            })
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/about',
