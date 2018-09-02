@@ -20,7 +20,6 @@ const namespaced: boolean = true
 
 const actions: ActionTree<ChartState, RootState> = {
   loadData({ commit }, payload) {
-    console.log(payload)
     service.loadData(payload.url, payload.type).subscribe((val: any) => {
       val.data.type = payload.type
       commit('loadData', val.data)

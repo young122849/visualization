@@ -3,6 +3,7 @@ var router = express.Router();
 var mongoose = require('mongoose')
 mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true }).then(msg => console.log('Successfully connected!'), err => console.error(err))
 var userModel = require('../models/users').model
+var privilegeModel = require('../models/priviliges').model
 var jwt = require('jsonwebtoken')
 
 /* GET home page. */
@@ -38,6 +39,7 @@ router.post('/session', function (req, res, next) {
       token: jwt.sign({ username: req.body.username }, 'This is a Secreat Key!', { expiresIn: 60 })
     }, { new: true }).exec().then(val => {
       if (val == null) {
+        // 没有找到用户
         res.json({ success: false, message: '用户名或密码错误', data: {} })
       } else {
         res.json({ success: true, message: '登录成功,请使用您的令牌', data: { username: val.username, token: val.token } })

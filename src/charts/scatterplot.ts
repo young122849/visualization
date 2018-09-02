@@ -1,15 +1,16 @@
 import { ProtoConfig, config } from '@/charts';
 import { renderQueue } from '@/utils/render-queue'
 import { throttle } from '@/utils/optimization'
+import store from '@/store';
 declare var d3: any
 
-interface Data {
-  sepalLength: number
-  sepalWidth: number
-  petalLength: number
-  petalWidth: number
-  species: string
-}
+// interface Data {
+//   sepalLength: number
+//   sepalWidth: number
+//   petalLength: number
+//   petalWidth: number
+//   species: string
+// }
 
 export default class Scatterplot {
   private xScale: any = null
@@ -43,13 +44,13 @@ export default class Scatterplot {
       .attr('transform', `translate(${this.cfg.margin.left}, ${this.cfg.margin.top})`)
 
     this.color = d3.scaleOrdinal(d3.schemeCategory10).domain(['setosa', 'versicolor', 'virginica'])
-    this.rq = renderQueue(this.draw, this)
+    this.rq = renderQueue(this, this.draw)
     this.container.append('g').attr('class', 'axis x-axis')
     this.container.append('g').attr('class', 'axis y-axis')
     this.quadtree = d3.quadtree()
     this.highlight = this.container.append('circle').attr('class', 'highlight')
   }
-  update(_data: Data[]) {
+  update(_data: any[]) {
     let devicePixelRatio = window.devicePixelRatio || 1;
     this.data = this.data || _data
     this.width = this.node.node().clientWidth - this.cfg.margin.left - this.cfg.margin.right
@@ -74,27 +75,56 @@ export default class Scatterplot {
       this.context.clearRect(0, 0, this.width, this.height)
     })(this.processed)
     let self = this
-    this.container.on('mousemove', throttle(function () {
-      let [x, y] = d3.mouse(this)
-      let cloest = self.quadtree.find(x, y)
-      self.highlight.attr('cx', cloest[0])
-        .attr('cy', cloest[1])
-        .attr('r', 6)
-        .attr('fill', cloest[2])
-    }, 300, true))
+    // this.container.on('mousemove', throttle(function () {
+    //   let [x, y] = d3.mouse(this)
+    //   let cloest = self.quadtree.find(x, y)
+    //   self.highlight.attr('cx', cloest[0])
+    //     .attr('cy', cloest[1])
+    //     .attr('r', 6)
+    //     .attr('fill', cloest[2])
+    // }, 300, true))
   }
   process() {
     if (this.data == null) {
       return
     }
-    this.xScale.domain(d3.extent(this.data, (d: Data) => +d.sepalWidth))
-    this.yScale.domain(d3.extent(this.data, (d: Data) => +d.sepalLength))
-    this.processed = this.data.map((d: Data) => {
-      return [this.xScale(d.sepalWidth), this.yScale(d.sepalLength), this.color(d.species)]
+    this.xScale.domain(d3.extent(this.data, (d: any) => +d['sepal width']))
+    this.yScale.domain(d3.extent(this.data, (d: any) => +d['sepal length']))
+    this.processed = this.data.map((d: any) => {
+      let temp: any = [this.xScale(+d['sepal width']), this.yScale(+d['sepal length']), this.color(d.species)]
+      temp.raw = d
+      return temp
     })
   }
   renderBrush() {
-    this.container.select('.brush').call(d3.brush().extent([[-1, -1], [this.width, this.height]]))
+    let self: any = this
+    this.container.select('.brush').call(d3.brush().extent([[-1, -1], [this.width, this.height]]).on('end', function () {
+      let extent = d3.brushSelection(this)
+      if (extent == null) {
+        store.commit('charts/loadSelected', self.data)
+        return
+
+      }
+
+      let selected: any[] = []
+
+      function search(quadtree: any, x0: number, y0: number, x3: number, y3: number) {
+        quadtree.visit(function (node: any, x1: number, y1: number, x2: number, y2: number) {
+          if (!node.length) {
+            // 访问到了叶子节点,只有叶子节点上存在数据
+            do {
+              let d = node.data
+              if ((d[0] >= x0) && (d[0] < x3) && (d[1] >= y0) && (d[1] < y3)) {
+                selected.push(d)
+              }
+            } while (node = node.next)
+          }
+          return x1 >= x3 || y1 >= y3 || x2 < x0 || y2 < y0;
+        })
+      }
+      search(self.quadtree, extent[0][0], extent[0][1], extent[1][0], extent[1][1])
+      store.commit('charts/loadSelected', selected.map((d: any) => d.raw))
+    }))
   }
   renderAxis() {
     // Render X axis
@@ -107,7 +137,7 @@ export default class Scatterplot {
     for (let d of _data) {
       this.context.beginPath()
       this.context.fillStyle = d[2]
-      this.context.arc(d[0], d[1], 3.5, 0, 2 * Math.PI)
+      this.context.arc(d[0], d[1], 5.5, 0, 2 * Math.PI)
       this.context.fill()
       this.context.stroke()
       this.context.closePath()

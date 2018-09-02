@@ -19,6 +19,7 @@ export default class AppIcon extends Vue {
   height: 1em;
   fill: currentColor;
   overflow: hidden;
+  vertical-align: -0.15em;
 }
 </style>
 

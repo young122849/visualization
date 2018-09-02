@@ -1,7 +1,7 @@
 <template>
   <div class="sidenav" :class="{'active': expand}">
     <div class="menu-container">
-      <a href="javascript:;" @click="handleClick('stacked-barchart')">
+      <a href="javascript:;" @click="handleClick('barchart')">
         <span class="icon">
           <app-icon iconClass="stacked"></app-icon>
         </span>
@@ -16,7 +16,14 @@
         <p>平行坐标</p>
       </a>
     </div>
-    <div class="menu-container"></div>
+    <div class="menu-container">
+      <a href="javascript:;" @click="handleClick('scatterplot')">
+        <span class="icon">
+          <app-icon iconClass="scatterplot"></app-icon>
+        </span>
+        <p>散点图</p>
+      </a>
+    </div>
   </div>
 </template>
 <script lang="ts">

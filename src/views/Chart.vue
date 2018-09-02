@@ -15,11 +15,13 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import AppParallelCoordinate from "@/components/AppParallelCoordinate.vue";
 import AppBarchart from "@/components/AppBarchart.vue";
+import AppScatterplot from "@/components/AppScatterplot.vue";
 import { Action, Getter } from "vuex-class";
 @Component({
   components: {
     AppParallelCoordinate,
-    AppBarchart
+    AppBarchart,
+    AppScatterplot
   }
 })
 export default class Chart extends Vue {
@@ -29,9 +31,19 @@ export default class Chart extends Vue {
   chartType: string = "";
 
   get realChartType() {
-    return this.chartType === "stacked-barchart"
-      ? "AppBarchart"
-      : "AppParallelCoordinate";
+    return this.chartType
+      ? `App${this.chartType
+          .replace(/-/g, " ")
+          .split(" ")
+          .map((str: string) => {
+            return str[0].toUpperCase() + str.substr(1);
+          })
+          .join("")}`
+      : "";
+    // return `App${this.chartType
+    //   .split("-")
+    // .map((str: string) => str[0].toUpperCase + str.substr(1))
+    // .join("")}`;
   }
 
   // @Getter("loadData", { namespace: "charts" })
@@ -69,7 +81,8 @@ export default class Chart extends Vue {
   position: relative;
   height: 100%;
   & .parallel-coordinate,
-  & .barchart {
+  & .barchart,
+  & .scatterplot {
     position: relative;
     height: 450px;
     margin: 2px;
