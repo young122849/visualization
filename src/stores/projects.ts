@@ -2,7 +2,7 @@ import { Module, ActionTree, MutationTree, GetterTree } from 'vuex';
 import store, { RootState } from '@/store';
 import ProjectService from '@/services/project.service';
 import { Project } from '@/models/project';
-let service = new ProjectService()
+let service = ProjectService.getInstance()
 
 export interface ProjectState {
   projects: Project[],

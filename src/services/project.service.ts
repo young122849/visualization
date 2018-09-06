@@ -2,9 +2,14 @@ import HttpModule from '@/api/http';
 import { Project } from '@/models/project'
 
 export default class ProjectService {
-  private httpModule: HttpModule
-  constructor() {
-    this.httpModule = new HttpModule()
+  private httpModule!: HttpModule
+  private static instance: ProjectService
+  static getInstance() {
+    if (!ProjectService.instance) {
+      ProjectService.instance = new ProjectService()
+      ProjectService.instance.httpModule = new HttpModule()
+    }
+    return ProjectService.instance
   }
   loadProjects(url: string) {
     return this.httpModule.get(url)
@@ -18,4 +23,5 @@ export default class ProjectService {
   updateProject(url: string, project: Project) {
     return this.httpModule.patch(url, project)
   }
+
 }

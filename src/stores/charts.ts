@@ -2,7 +2,7 @@ import { Module, ActionTree, MutationTree, GetterTree } from 'vuex';
 import store, { RootState } from '@/store';
 import { pluck } from 'rxjs/operators';
 import ChartService from '@/services/chart.service';
-let service = new ChartService()
+let service = ChartService.getInstance()
 
 export interface ChartState {
   type: string,
@@ -20,6 +20,7 @@ const namespaced: boolean = true
 
 const actions: ActionTree<ChartState, RootState> = {
   loadData({ commit }, payload) {
+    console.log(payload)
     service.loadData(payload.url, payload.type).subscribe((val: any) => {
       val.data.type = payload.type
       commit('loadData', val.data)

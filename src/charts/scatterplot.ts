@@ -88,6 +88,7 @@ export default class Scatterplot {
     if (this.data == null) {
       return
     }
+    store.commit('charts/loadSelected', this.data)
     this.xScale.domain(d3.extent(this.data, (d: any) => +d['sepal width']))
     this.yScale.domain(d3.extent(this.data, (d: any) => +d['sepal length']))
     this.processed = this.data.map((d: any) => {

@@ -11,6 +11,9 @@ import { filter, pluck } from 'rxjs/operators';
 let service = new Userservice()
 Vue.use(Router)
 
+const ImportLogin = () => import(/* webpackChunkName: "login" */'./views/Login.vue')
+const ImportRegister = () => import(/* webpackChunkName: "register" */'./views/Register.vue')
+
 export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
@@ -62,12 +65,12 @@ export default new Router({
     {
       path: '/login',
       name: 'login',
-      component: Login
+      component: ImportLogin
     },
     {
       path: '/register',
       name: 'register',
-      component: Register
+      component: ImportRegister
     },
     {
       path: '/charts',

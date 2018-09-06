@@ -1,6 +1,6 @@
 <template>
   <div class="chart">
-    <div :is="realChartType"></div>
+    <component :is="chartType"></component>
     <div class="table">
       <el-table
       :data="selected"
@@ -17,11 +17,26 @@ import AppParallelCoordinate from "@/components/AppParallelCoordinate.vue";
 import AppBarchart from "@/components/AppBarchart.vue";
 import AppScatterplot from "@/components/AppScatterplot.vue";
 import { Action, Getter } from "vuex-class";
+import { Route } from "vue-router";
 @Component({
   components: {
     AppParallelCoordinate,
     AppBarchart,
     AppScatterplot
+  },
+  beforeRouteUpdate(to: Route, from: Route, next: any) {
+    this.chartType = `App${to.query.type
+      .replace(/-/g, " ")
+      .split(" ")
+      .map((str: string) => {
+        return str[0].toUpperCase() + str.substr(1);
+      })
+      .join("")}`;
+    this.$store.dispatch("charts/loadData", {
+      url: "http://localhost:3000/charts",
+      type: to.query.type
+    });
+    next();
   }
 })
 export default class Chart extends Vue {
@@ -29,34 +44,6 @@ export default class Chart extends Vue {
   loadData(obj: any) {}
 
   chartType: string = "";
-
-  get realChartType() {
-    return this.chartType
-      ? `App${this.chartType
-          .replace(/-/g, " ")
-          .split(" ")
-          .map((str: string) => {
-            return str[0].toUpperCase() + str.substr(1);
-          })
-          .join("")}`
-      : "";
-    // return `App${this.chartType
-    //   .split("-")
-    // .map((str: string) => str[0].toUpperCase + str.substr(1))
-    // .join("")}`;
-  }
-
-  // @Getter("loadData", { namespace: "charts" })
-  // data!: any[];
-
-  @Watch("$route")
-  watch$route(newVal: any, oldVal: any) {
-    this.chartType = newVal.query.type;
-    this.loadData({
-      url: "http://localhost:3000/charts",
-      type: newVal.query.type
-    });
-  }
 
   // @Watch("data")
   // watchData(newVal: any[], oldVal: any[]) {}
@@ -67,13 +54,13 @@ export default class Chart extends Vue {
   @Getter("loadSelected", { namespace: "charts" })
   selected!: any[];
 
-  mounted() {
-    this.chartType = this.$route.query.type;
-    this.loadData({
-      url: "http://localhost:3000/charts",
-      type: this.$route.query.type
-    });
-  }
+  // mounted() {
+  //   this.chartType = this.$route.query.type;
+  //   this.loadData({
+  //     url: "http://localhost:3000/charts",
+  //     type: this.$route.query.type
+  //   });
+  // }
 }
 </script>
 <style lang="scss">

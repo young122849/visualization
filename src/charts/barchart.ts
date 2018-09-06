@@ -64,7 +64,6 @@ export default class Barchart {
     this.x.domain(this.data.map((d: any) => d.State))
     this.y.domain([0, d3.max(this.data, (d: any) => d.total)]).nice()
     this.processed = this.stack(this.data)
-    console.log(this.processed)
   }
   render(data: any) {
     let updates = this.container.select('.bars').selectAll('.bar').data(data, (d: any) => d.key)

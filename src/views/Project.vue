@@ -19,10 +19,19 @@ import { Project } from "@/models/Project.ts";
 import { Action, Getter } from "vuex-class";
 import ProjectService from "@/services/project.service";
 import { renderQueue } from "@/utils/render-queue.ts";
+import { Route } from "vue-router";
 @Component({
   components: {
     AppProjectItem,
     AppProjectDialog
+  },
+  beforeRouteEnter(to, from, next) {
+    let service: ProjectService = ProjectService.getInstance();
+    service.loadProjects("http://localhost:3000/projects").subscribe(val => {
+      next(vm => {
+        vm.$store.commit("projects/getProjects", val.data);
+      });
+    });
   }
 })
 export default class AppProject extends Vue {
@@ -30,10 +39,8 @@ export default class AppProject extends Vue {
   newDialog: boolean = false;
   projectDetail: any = null;
   data: object = {};
-  service: ProjectService = new ProjectService();
 
-  @Action("loadProjects", { namespace: "projects" })
-  loadProjects() {}
+  service: ProjectService = new ProjectService();
 
   @Action("addProject", { namespace: "projects" })
   addProject(project: Project) {}
@@ -123,15 +130,11 @@ export default class AppProject extends Vue {
     }
     this.newDialog = false;
   }
-
-  mounted() {
-    this.loadProjects();
-    this.rq([1, 2, 3, 4, 5, 6]);
-  }
 }
 </script>
 <style lang="scss" scoped>
 .project {
+  box-sizing: border-box;
   height: 100%;
   padding: 20px;
   overflow: auto;
